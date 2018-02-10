@@ -14,9 +14,10 @@ type SlaveManager interface {
 func Start(manager SlaveManager) {
 	e := echo.New()
 
-	e.POST("/party", createParty)
+	e.POST("/api/party", createParty)
+	e.GET("/api/party/:id", loadParty)
 
-	e.GET("/lobby/ws", lobbyWebsocket)
+	e.GET("/ws/lobby", lobbyWebsocket)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
