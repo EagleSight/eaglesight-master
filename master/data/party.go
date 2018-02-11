@@ -20,6 +20,7 @@ type NewPartyParameters struct {
 type Party struct {
 	ID          string `json:"id"`
 	TerrainName string `json:"terrain"`
+	Status      string `json:"status"`
 }
 
 // CreateParty creates a new party
@@ -37,6 +38,7 @@ func (db *Db) CreateParty(params NewPartyParameters) (newParty Party, err error)
 	newParty = Party{
 		ID:          partyID,
 		TerrainName: params.TerrainName,
+		Status:      "open",
 	}
 
 	DB := db.newDB()
