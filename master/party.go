@@ -2,22 +2,32 @@ package master
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/eaglesight/eaglesight-master/master/data"
+
 	"github.com/labstack/echo"
 )
 
 // Create a party
-func createParty(c echo.Context) error {
+func (h *handler) createParty(c echo.Context) error {
 
-	time.Sleep(time.Second * 1)
+	partyParams := &data.NewPartyParameters{}
+
+	if err := c.Bind(partyParams); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	newParty, err := h.db.CreateParty(*partyParams)
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 
 	// Add party id to the database
-	return c.String(http.StatusCreated, data.CreateParty())
+	return c.JSON(http.StatusCreated, newParty)
 }
 
-func loadParty(c echo.Context) error {
+func (h *handler) loadParty(c echo.Context) error {
 
 	partyID := c.Param("id")
 

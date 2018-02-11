@@ -1,6 +1,7 @@
 package master
 
 import (
+	"github.com/eaglesight/eaglesight-master/master/data"
 	"github.com/labstack/echo"
 )
 
@@ -10,12 +11,25 @@ type SlaveManager interface {
 	Kill(string) error
 }
 
+type handler struct {
+	db *data.Db
+}
+
 // Start starts the master
 func Start(manager SlaveManager) {
 	e := echo.New()
 
-	e.POST("/api/party", createParty)
-	e.GET("/api/party/:id", loadParty)
+	db, err := data.NewDb()
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+
+	h := &handler{
+		db: db,
+	}
+
+	e.POST("/api/party", h.createParty)
+	e.GET("/api/party/:id", h.loadParty)
 
 	e.GET("/ws/lobby", lobbyWebsocket)
 
