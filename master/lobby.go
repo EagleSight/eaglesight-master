@@ -1,8 +1,6 @@
 package master
 
 import (
-	"time"
-
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 )
@@ -11,7 +9,10 @@ var (
 	upgrader = websocket.Upgrader{}
 )
 
-func lobbyWebsocket(c echo.Context) error {
+func (h *handler) lobbyWebsocket(c echo.Context) error {
+
+	// Get the channel from the waiting room
+	messages := h.waitingroom.SubscribeToSummary()
 
 	noOriginRequest := c.Request()
 
@@ -19,24 +20,21 @@ func lobbyWebsocket(c echo.Context) error {
 
 	c.SetRequest(noOriginRequest)
 
-	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 
 	if err != nil {
 		return err
 	}
-	defer ws.Close()
 
-	for {
-		time.Sleep(time.Second * 1)
+	for msg := range messages {
 
-		// Always returns [] for now
-		err := ws.WriteMessage(websocket.TextMessage, []byte("[]"))
+		err := conn.WriteMessage(websocket.TextMessage, msg)
 
 		if err != nil {
 			c.Logger().Error(err)
+			conn.Close()
 			break
 		}
-
 	}
 
 	return nil

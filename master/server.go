@@ -2,6 +2,7 @@ package master
 
 import (
 	"github.com/eaglesight/eaglesight-master/master/data"
+	"github.com/eaglesight/eaglesight-master/master/waitingroom"
 	"github.com/labstack/echo"
 )
 
@@ -12,7 +13,8 @@ type SlaveManager interface {
 }
 
 type handler struct {
-	db *data.Db
+	db          *data.Db
+	waitingroom *waitingroom.WaitingRoom
 }
 
 // Start starts the master
@@ -25,13 +27,14 @@ func Start(manager SlaveManager) {
 	}
 
 	h := &handler{
-		db: db,
+		db:          db,
+		waitingroom: waitingroom.InitWaitingRoom(),
 	}
 
 	e.POST("/api/party", h.createParty)
 	e.GET("/api/party/:id", h.loadParty)
 
-	e.GET("/ws/lobby", lobbyWebsocket)
+	e.GET("/ws/lobby", h.lobbyWebsocket)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

@@ -23,6 +23,11 @@ func (h *handler) createParty(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
+	// Add a lobby in the waiting room
+	if err := h.waitingroom.AddLobby(newParty.ID, newParty.TerrainName); err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
 	// Add party id to the database
 	return c.JSON(http.StatusCreated, newParty)
 }
